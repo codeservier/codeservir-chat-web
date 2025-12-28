@@ -1,0 +1,13 @@
+# dependencies
+node_modules
+
+# production
+/dist
+
+# environment
+.env
+
+# misc
+.DS_Store
+*.log
+coverage/
