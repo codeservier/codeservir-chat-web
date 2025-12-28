@@ -65,9 +65,7 @@ CREATE TABLE IF NOT EXISTS chat_history (
     session_id VARCHAR(255) NOT NULL,
     user_message TEXT NOT NULL,
     bot_response TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_chatbot_session (chatbot_id, session_id),
-    INDEX idx_created_at (created_at)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Payment Transactions Table
@@ -116,3 +114,5 @@ CREATE TRIGGER update_knowledge_base_updated_at BEFORE UPDATE ON knowledge_base
 
 CREATE TRIGGER update_payment_transactions_updated_at BEFORE UPDATE ON payment_transactions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE INDEX idx_chatbot_session ON chat_history(chatbot_id, session_id);
+CREATE INDEX idx_chat_history_created_at ON chat_history(created_at);
