@@ -25,10 +25,34 @@ export class WebScraperService {
         try {
             console.log(`🔍 Starting to scrape: ${url}`);
 
-            const browser = await puppeteer.launch({
-                headless: true,
-                args: ['--no-sandbox', '--disable-setuid-sandbox'],
-            });
+            // On Vercel, Puppeteer often requires specific configuration (chrome-aws-lambda).
+            // For now, we'll try to launch, but fallback to simple scraping if it fails
+            // or if we detect we are in a serverless environment without proper setup.
+            let browser;
+            try {
+                if (process.env.VERCEL) {
+                    console.warn('⚠️ Running on Vercel: dynamic scraping with Puppeteer might be limited. Consider using a dedicated scraping API.');
+                    // Attempt launch (will likely fail purely with 'puppeteer' package on Vercel)
+                    // If you have 'puppeteer-core' and '@sparticuz/chromium', configure it here.
+                    // For now, we will throw to trigger fallback to scrapeSimple.
+                    throw new Error('Puppeteer disabled on Vercel standard environment');
+                }
+
+                browser = await puppeteer.launch({
+                    headless: true,
+                    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+                });
+            } catch (launchError) {
+                console.warn('⚠️ Puppeteer launch failed (expected on serverless without config). Falling back to simple scraping.', launchError);
+                // Fallback to simple scraping for the main URL
+                const simpleContent = await this.scrapeSimple(url);
+                return [{
+                    url,
+                    title: 'Scraped Content',
+                    content: simpleContent,
+                    links: []
+                }];
+            }
 
             const scrapedPages: ScrapedContent[] = [];
             const visitedUrls = new Set<string>();

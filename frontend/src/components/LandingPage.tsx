@@ -53,7 +53,8 @@ const LandingPage: React.FC = () => {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:5001/api/chatbot/create', {
+            const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+            const response = await fetch(`${API_URL}/api/chatbot/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -146,10 +147,10 @@ const LandingPage: React.FC = () => {
                             <p className="text-gray-600 mb-4">Use this URL in your mobile app's WebView:</p>
                             <div className="relative bg-gray-900 rounded-xl p-6">
                                 <pre className="text-green-400 text-sm overflow-x-auto font-mono">
-                                    {`http://localhost:5001/embed/${chatbotResponse.chatbot.id}`}
+                                    {`${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/embed/${chatbotResponse.chatbot.id}`}
                                 </pre>
                                 <button
-                                    onClick={() => copyToClipboard(`http://localhost:5001/embed/${chatbotResponse.chatbot.id}`)}
+                                    onClick={() => copyToClipboard(`${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/embed/${chatbotResponse.chatbot.id}`)}
                                     className="absolute top-4 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:scale-105"
                                 >
                                     Copy URL
