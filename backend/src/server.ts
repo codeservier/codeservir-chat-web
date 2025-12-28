@@ -25,7 +25,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files (for widget)
-app.use('/static', express.static(path.join(__dirname, '../../public')));
+const publicPath = path.join(process.cwd(), 'public');
+app.use('/static', express.static(publicPath));
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
@@ -40,12 +41,12 @@ app.use('/api/payment', paymentRoutes);
 // Widget endpoint
 app.get('/widget.js', (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'application/javascript');
-    res.sendFile(path.join(__dirname, '../../public/widget.js'));
+    res.sendFile(path.join(publicPath, 'widget.js'));
 });
 
 // Embed endpoint (for WebView)
 app.get('/embed/:chatbotId', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, '../../public/embed.html'));
+    res.sendFile(path.join(publicPath, 'embed.html'));
 });
 
 // 404 handler
