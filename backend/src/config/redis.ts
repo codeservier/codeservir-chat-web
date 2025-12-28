@@ -31,10 +31,15 @@ redisClient.on('ready', () => {
 
 export const connectRedis = async () => {
     try {
-        await redisClient.connect();
+        if (!redisClient.isOpen) {
+            await redisClient.connect();
+        }
     } catch (error) {
         console.error('Failed to connect to Redis:', error);
-        throw error;
+        // Don't throw in Vercel environment to prevent crash, just log
+        if (!process.env.VERCEL) {
+            throw error;
+        }
     }
 };
 

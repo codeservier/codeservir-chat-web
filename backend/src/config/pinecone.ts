@@ -3,27 +3,46 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const pinecone = new Pinecone({
-    apiKey: process.env.PINECONE_API_KEY || '',
-});
+let pinecone: Pinecone | null = null;
+try {
+    if (process.env.PINECONE_API_KEY) {
+        pinecone = new Pinecone({
+            apiKey: process.env.PINECONE_API_KEY,
+        });
+    } else {
+        console.warn('⚠️ PINECONE_API_KEY is missing. Vector search will not work.');
+    }
+} catch (error) {
+    console.error('❌ Failed to instantiate Pinecone client:', error);
+}
 
 const indexName = process.env.PINECONE_INDEX_NAME || 'codeservir-embeddings';
 
 export const getPineconeIndex = () => {
+    if (!pinecone) {
+        throw new Error('Pinecone client not initialized (Missing API Key?)');
+    }
     return pinecone.index(indexName);
 };
 
 export const initializePinecone = async () => {
     try {
+        if (!pinecone) {
+            console.warn('⚠️ Skipping Pinecone initialization: Client not initialized (Missing API Key?)');
+            return;
+        }
+
+        const pc = pinecone;
+
         console.log('🔄 Initializing Pinecone...');
 
         // Check if index exists
-        const indexes = await pinecone.listIndexes();
+        const indexes = await pc.listIndexes();
         const indexExists = indexes.indexes?.some(index => index.name === indexName);
 
         if (!indexExists) {
             console.log(`📝 Creating Pinecone index: ${indexName}`);
-            await pinecone.createIndex({
+            await pc.createIndex({
                 name: indexName,
                 dimension: 1536, // OpenAI embedding dimension
                 metric: 'cosine',
@@ -42,7 +61,7 @@ export const initializePinecone = async () => {
         return getPineconeIndex();
     } catch (error) {
         console.error('❌ Failed to initialize Pinecone:', error);
-        throw error;
+        // Don't throw, just log. Allow server to start without Vector DB.
     }
 };
 
